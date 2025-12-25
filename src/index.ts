@@ -109,7 +109,7 @@ async function mondayGraphql<T>(token: string, query: string, variables?: Record
 
   if (!res.ok) throw new Error(`monday HTTP ${res.status}: ${await res.text()}`);
 
-  const json = await res.json();
+  const json = await res.json() as any;
 
   if (json?.errors?.length) {
     const msg = json.errors.map((e: any) => e.message).join(" | ");
@@ -361,7 +361,7 @@ async function runSync(opts: { force: boolean }): Promise<any> {
     finishedUtc: nowISO,
   };
 
-  logger.info("sync finished", result);
+  logger.info("sync finished");
 
   // Advance state only on full success and not dry-run, and only when not forced.
   if (!opts.force && !dryRun && errors.length === 0) {
@@ -386,7 +386,7 @@ app.post("/mndy-cronjob/sync-customers", async (_req, res) => {
     return res.status(200).json(out);
   } catch (e: any) {
     if (e?.name === "MondayAuthError") {
-      logger.error("MONDAY AUTH ERROR - rotate MONDAY_ACCESS_TOKEN secret", { error: String(e?.message ?? e) });
+      logger.error("MONDAY AUTH ERROR - rotate MONDAY_ACCESS_TOKEN secret");
     } else {
       logger.error("sync failed", { error: e });
     }
@@ -405,13 +405,13 @@ app.post("/manual/run", async (_req, res) => {
     return res.status(200).json(out);
   } catch (e: any) {
     if (e?.name === "MondayAuthError") {
-      logger.error("MONDAY AUTH ERROR - rotate MONDAY_ACCESS_TOKEN secret", { error: String(e?.message ?? e) });
+      logger.error("MONDAY AUTH ERROR - rotate MONDAY_ACCESS_TOKEN secret");
     } else {
-      logger.error("manual sync failed", { error: e });
+      logger.error("manual sync failed");
     }
     return res.status(500).json({ error: String(e?.message ?? e) });
   }
 });
 
 const port = Number(process.env.PORT ?? 8080);
-app.listen(port, () => logger.info("Server listening", { port }));
+app.listen(port, () => logger.info(`Server listening on port: ${port}`));
